@@ -218,6 +218,17 @@ meter = Meter(
     # browser_path="/usr/bin/google-chrome-stable"
 )
 
+# make sure to comment below out before pushing
+# import test
+# meter = Meter(
+#     email=test.email,
+#     password=test.password,
+#     mfa_type=test.mfa_type,
+#     mfa_secret=test.mfa_secret,
+#     account_uuid=test.account_uuid,
+#     meter_number=test.meter_number
+# )
+
 
 
 print(f"Calling meter.last_read()..")
