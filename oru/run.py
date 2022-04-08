@@ -121,20 +121,6 @@ class Meter(object):
             raise MeterError("Error requesting meter data")
 
     async def browse(self):
-        # screenshotFiles = glob.glob('meter*.png')
-        # for filePath in screenshotFiles:
-        #     try:
-        #         os.remove(filePath)
-        #     except:
-        #         print("Error while deleting file : ", filePath)
-
-
-        # browser_launch_config = {
-        #     'defaultViewport': {'width': 1920, 'height': 1080},
-        #     'dumpio': False,
-        #     'headless': True,
-        #     'args': ['--no-sandbox']
-        #     }
 
         browser_launch_config = {
             "defaultViewport": {"width": 1920, "height": 1080},
@@ -219,6 +205,8 @@ meter = Meter(
 )
 
 # make sure to comment below out before pushing
+
+
 # import test
 # meter = Meter(
 #     email=test.email,
