@@ -1,0 +1,7 @@
+pyotp
+requests
+pyppeteer
+paho-mqtt
+shutil
+requests
+coned == 0.2.8
