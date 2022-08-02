@@ -130,3 +130,5 @@ dmypy.json
 .DS_Store
 oru/test.py
 **test.py
+monkeypox/test.py
+monkeypox/test.py
