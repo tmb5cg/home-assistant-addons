@@ -4,7 +4,7 @@
 
 Home Assistant allows anyone to create add-on repositories to share their
 add-ons for Home Assistant easily. This repository is one of those repositories,
-providing extra Home Assistant add-ons for your installation.
+providing extra Home Assistant add-ons for your installation. Credits to [original author](https://github.com/bvlaicu/home-assistant-addons).
 
 ## Installation
 
@@ -15,23 +15,13 @@ Use the following URL to add this repository:
 ```txt
 https://github.com/tmb5cg/home-assistant-addons
 ```
-All credit to bvailcu for starter code this is a test commit yolo
 
 ## Add-ons provided by this repository
 
-
-### [Dashcast][addon-dashcast]
-Display dashboard web pages on your Chromecast device
-### [Meter Reader][addon-meter-reader]
-Put a webcam in front of your utility meter and AWS Rekognition sends the reading over MQTT to a MQTT server of your choice
-### [MiniDLNA][addon-minidlna]
-MiniDLNA server serving web content from the /data persistent volume
-### [RTLAMR][addon-rtlamr]
-Listen for 433MHz RF transmissions of utility meterss and publish the data via MQTT
-### [Oru][addon-oru]
-Retrieving the last meter read from Orange and Rockland Utility or ConEdison and publish the data via MQTT
-### [PHP][addon-php]
-PHP server serving web content from the /data persistent volume
+### [ConEd Energy Usage Logger][addon-oru]
+Retrieving the last meter read from ConEdison and publishes data via MQTT
+### [Monkeypox Vaccine Appointment Availability Dectector][addon-monkeypox]
+Scrapes NY state vaccine portal for Monkeypox vaccine availability
 
 ## Releases
 
@@ -43,20 +33,6 @@ based on the following:
 - ``MINOR``: Backwards-compatible new features and enhancements.
 - ``PATCH``: Backwards-compatible bugfixes and package updates.
 
-## Support
-
-Got questions?
-
-You have several options to get them answered:
-
-- The Home Assistant Community Add-ons [Discord Chat Server][discord]
-- The Home Assistant [Community Forum][forum].
-- The Home Assistant [Discord Chat Server][discord-ha].
-- Join the [Reddit subreddit][reddit] in [/r/homeassistant][reddit]
-
-You could also open an issue here on GitHub. Note, we use a separate
-GitHub repository for each add-on. Please ensure you are creating the issue
-on the correct GitHub repository matching the add-on.
 
 ## License
 
@@ -83,9 +59,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-[addon-dashcast]: https://github.com/bvlaicu/home-assistant-addons/tree/master/dashcast
-[addon-meter-reader]: https://github.com/bvlaicu/home-assistant-addons/tree/master/meter-reader
-[addon-minidlna]: https://github.com/bvlaicu/home-assistant-addons/tree/master/minidlna
-[addon-rtlamr]: https://github.com/bvlaicu/home-assistant-addons/tree/master/rtlamr
-[addon-oru]: https://github.com/bvlaicu/home-assistant-addons/tree/master/oru
-[addon-php]: https://github.com/bvlaicu/home-assistant-addons/tree/master/php
+[addon-oru]: https://github.com/tmb5cg/home-assistant-addons/tree/main/oru
+[addon-monkeypox]: https://github.com/bvlaicu/home-assistant-addons/tree/master/monkeypox
