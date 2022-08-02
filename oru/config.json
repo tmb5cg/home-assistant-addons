@@ -1,9 +1,9 @@
 {
-  "name": "monkeypox yeet",
+  "name": "ConEd Energy Usage Logger",
   "version": "0.3.11",
   "slug": "oru",
-  "description": "Orange and Rockland Utility meter reading to MQTT",
-  "url": "https://github.com/bvlaicu/home-assistant-addons/tree/master/oru",
+  "description": "Reads data from ConEd site via credentials and sends reading to MQTT",
+  "url": "https://github.com/tmb5cg/home-assistant-addons/tree/master/oru",
   "panel_icon": "mdi:chart-areaspline",
   "startup": "application",
   "homeassistant": "0.92.0b2",
