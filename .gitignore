@@ -132,3 +132,5 @@ oru/test.py
 **test.py
 monkeypox/test.py
 monkeypox/test.py
+monkeypox/gui.py
+monkeypox/instabot.py

@@ -40,7 +40,7 @@ while true; do
   #tail -f /dev/null
 
   echo ""
-  echo "Sleeping 30 mins.."
-  sleep 1800
+  echo "Sleeping 30 seconds.."
+  sleep 30
   echo ""
 done

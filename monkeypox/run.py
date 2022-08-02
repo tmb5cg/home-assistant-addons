@@ -1,266 +1,164 @@
 import os
-import asyncio
-import paho.mqtt.client as mqtt
-import json
-import logging
+import os.path
+import platform
 import time
-import pyppeteer
+from datetime import date, datetime
+from decimal import Decimal
+from os import path
+from time import sleep
+from tokenize import Double
+from venv import create
 
-# start of class definitions here
-class MeterError(Exception):
-    pass
-
-
-class Meter(object):
-    """A smart energy meter of ConEdison or Orange and Rockland Utility.
-
-    Attributes:
-        email: A string representing the email address of the account
-        password: A string representing the password of the account
-        mfa_type: Meter.MFA_TYPE_SECURITY_QUESTION or Meter.MFA_TYPE_TOTP
-        mfa_secret: A string representing the multiple factor authorization secret
-        account_uuid: A string representing the account uuid
-        meter_number: A string representing the meter number
-        site: Optional. Either `coned` (default, for ConEdison) or `oru` (for Orange and Rockland Utility)
-        loop: Optional. Specific event loop if needed. Defaults to creating the event loop.
-        browser_path: Optional. Specific chromium browser installation. Default to the installation that comes with pyppeteer.
-    """
-
-    MFA_TYPE_SECURITY_QUESTION = 'SECURITY_QUESTION'
-    MFA_TYPE_TOTP = 'TOTP'
-    SITE_CONED = 'coned'
-    DATA_SITE_CONED = 'cned'
-    SITE_ORU = 'oru'
-    DATA_SITE_ORU = 'oru'
-
-    def __init__(self, email, password, mfa_type, mfa_secret, account_uuid, meter_number, account_number=None, site='coned', loop=None, browser_path=None):
-        self._LOGGER = logging.getLogger(__name__)
-
-        """Return a meter object whose meter id is *meter_number*"""
-        self.email = email
-        if self.email is None:
-            raise MeterError("Error initializing meter data - email is missing")
-        # _LOGGER.debug("email = %s", self.email.replace(self.email[:10], '*'))
-
-        self.password = password
-        if self.password is None:
-            raise MeterError("Error initializing meter data - password is missing")
-        # _LOGGER.debug("password = %s", self.password.replace(self.password[:9], '*'))
-
-        self.mfa_type = mfa_type
-        if self.mfa_type is None:
-            raise MeterError("Error initializing meter data - mfa_type is missing")
-        self._LOGGER.debug("mfa_type = %s", self.mfa_type)
-        if self.mfa_type not in [Meter.MFA_TYPE_SECURITY_QUESTION, Meter.MFA_TYPE_TOTP]:
-            raise MeterError("Error initializing meter data - unsupported mfa_type %s", self.mfa_type)
-
-        self.mfa_secret = mfa_secret
-        if self.mfa_secret is None:
-            raise MeterError("Error initializing meter data - mfa_secret is missing")
-        # _LOGGER.debug("mfa_secret = %s", self.mfa_secret.replace(self.mfa_secret[:8], '*'))
-
-        self.account_uuid = account_uuid
-        if self.account_uuid is None:
-            raise MeterError("Error initializing meter data - account_uuid is missing")
-        # _LOGGER.debug("account_uuid = %s", self.account_uuid.replace(self.account_uuid[:20], '*'))
-
-        self.meter_number = meter_number.lstrip("0")
-        if self.meter_number is None:
-            raise MeterError("Error initializing meter data - meter_number is missing")
-        # _LOGGER.debug("meter_number = %s", self.meter_number.replace(self.meter_number[:5], '*'))
-
-        self.account_number = account_number
-
-        self.site = site
-        if site == Meter.SITE_CONED:
-            self.data_site = Meter.DATA_SITE_CONED
-        elif site == Meter.SITE_ORU:
-            self.data_site = Meter.DATA_SITE_ORU
-        self._LOGGER.debug("site = %s", self.site)
-        if self.site not in [Meter.SITE_CONED, Meter.SITE_ORU]:
-            raise MeterError("Error initializing meter data - unsupported site %s", self.site)
-
-        self.loop = loop
-        self._LOGGER.debug("loop = %s", self.loop)
-
-        self.browser_path = browser_path
-        self._LOGGER.debug("browser_path = %s", self.browser_path)
+import paho.mqtt.client as mqtt
+import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.common.exceptions import (NoSuchElementException,
+                                        TimeoutException, WebDriverException)
+from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import ui
+from selenium.webdriver.support.wait import WebDriverWait
 
 
-    async def last_read(self):
-        """Return the last meter read value and unit of measurement"""
-        try:
-            # asyncio.set_event_loop(self.loop)
-            # asyncio.get_event_loop().create_task(self.browse())
+class InstaBot:
+    def __init__(self, driver, queue):
+        self.driver = driver
+        self.queue = ""
+        self.appointments_available = False
 
-            await self.browse()
 
-            # Reassign to fit legacy code'
+    def mainFunc(self):
+        # self.startup_methods()
+        print("Initializing...")
+        response = self.monkeypox()
         
+        # send response
+        self.send_to_mqtt(response)
 
 
-            # jsonResponse = self.data
-            
-            # if 'error' in jsonResponse:
-            #     raise MeterError(jsonResponse['error']['details'])   # ERROR HERE
-            # for read in jsonResponse['reads']:
-            #     if read['value'] is not None:
-            #         lastRead = read
+    def send_to_mqtt(self, response):
+        print(f"Calling meter.last_read()..")
+        if response.lower() == "NO":
+            response = 0.5
+        elif response.lower() == "YES":
+            response = 2
+        else:
+            response=0
 
-            # self._LOGGER.debug("lastRead = %s", lastRead)
-            # self.startTime = lastRead['startTime']
-            # self.endTime = lastRead['endTime']
-            # self.last_read_val = lastRead['value']
-            # self.unit_of_measurement = jsonResponse['unit']
+        startTime = response
 
-            # self._LOGGER.info("last read = %s %s %s %s", self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement)
+        message = {'startTime': startTime}
 
-            # testArray = [self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement]
-           
+        print(f"message: {message}")
+
+        # mqtthost = os.getenv("MQTT_HOST")
+        # mqttuser = os.getenv("MQTT_USER")
+        # mqttpass = os.getenv("MQTT_PASS")
+
+        mqtthost = '192.168.1.15'
+        mqttuser = 'mosquitto'
+        mqttpass = 'mosq'
+
+        print(f"Connecting to mqtt {mqtthost} as {mqttuser}")
+
+        mqttc = mqtt.Client("oru_meter_reader")
+        mqttc.username_pw_set(username=mqttuser, password=mqttpass)
+        mqttc.connect(mqtthost)
+
+        print(f"Publishing to mqtt")
+
+        print(f"Publishing electric_meter/startTime: {startTime}")
+        mqttc.publish('monkeypox/startTime', startTime, retain=True)
+        time.sleep(1)
+
+
+        print(f"Disconnectig from mqtt")
+        mqttc.disconnect()
+
+        print(f"DONE\n\n")
+
+    def monkeypox(self):
+        self.driver.get("https://vax4nyc.nyc.gov/patient/s/vaccination-schedule?page=Monkeypox")
+        time.sleep(5)
+
+        dateinput = self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[3]/div/div/c-vcms-schedule-flow/main/div[2]/section[1]/div/section/c-vcm-screening-questions-section-a/div[1]/div[2]/div[2]/lightning-input[1]/lightning-datepicker/div/div/input")
+        time.sleep(2)
+
+        dateinput.send_keys("12/16/1995")
+
+        zipcode = self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[3]/div/div/c-vcms-schedule-flow/main/div[2]/section[1]/div/section/c-vcm-screening-questions-section-a/div[1]/div[2]/div[2]/lightning-input[2]/div/input")
+        time.sleep(2)
+
+        zipcode.send_keys("10016")
+
+        time.sleep(2)
         
-            return self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement
-        except:
-            raise MeterError("Error requesting meter data")
+        radiobutton = self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[3]/div/div/c-vcms-schedule-flow/main/div[2]/section[1]/div/section/c-vcm-screening-questions-section-a/div[1]/div[2]/div[3]/div/lightning-radio-group/fieldset/div/span[2]/label/span[1]")
+        time.sleep(2)
 
-    async def browse(self):
+        radiobutton.click()
 
-        browser_launch_config = {
-            "defaultViewport": {"width": 1920, "height": 1080},
-            "dumpio": True,
-            "args": ["--no-sandbox", "--disable-gpu", "--disable-software-rasterizer"]}
-        if self.browser_path is not None:
-            browser_launch_config['executablePath'] = self.browser_path
+        nextbutton = self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[3]/div/div/c-vcms-schedule-flow/main/div[2]/section[2]/div[1]/div/button[2]")
+        time.sleep(2)
 
-        # Create browser and login
-        browser = await pyppeteer.launch(browser_launch_config)
-        page = await browser.newPage()
-        await page.goto('https://coned.com/en/login', {'waitUntil' : 'domcontentloaded'})
-        element = await page.querySelector('#form-login-email')
-        logging.info('Authenticating...')
+        nextbutton.click()
 
-        await page.type('#form-login-email', self.email)
-        await page.type('#form-login-password', self.password)
-        await page.click('.submit-button')
+        time.sleep(6)
 
+        notavailable = self.driver.find_elements(By.XPATH, "/html/body/div[5]/div/div[3]/div/div/c-vcms-schedule-flow/main/div[2]/section[1]/div/section/c-vcms-book-appointment/article")
 
-        # Get MFA form object
-        mfa_form = await fetch_element(page, '.js-login-new-device-form-selector:not(.hidden)')
-        if mfa_form is None:
-            logging.error('Never got MFA prompt. Aborting!')
-            return
+        appointments_available = False
+        response = False
 
-        # Enter MFA form text box
-        logging.info('Entering MFA code...')
-        mfa = await fetch_element(page, '#form-login-mfa-code')
-        await mfa.type(self.mfa_secret)
-        await asyncio.gather(
-            page.waitForNavigation(),
-            page.click('.js-login-new-device-form .button'),
-        )
+        for elem in notavailable:
+            try:
+                text = elem.text
+                text = text.lower()
+                if "no appointments are currently available" in text:
+                    appointments_available = False
+                    print("No appointments are currently available.")
+                else:
+                    print("Appointments may be available; something changed.")
+                    appointments_available = True
+            except:
+                continue
+            if appointments_available:
+                return "YES"
+            else:
+                return "NO"
 
-        # Await page load
-        logging.info('Pausing for auth...')
-        await page.waitFor(5000)
-        logging.info('Fetching readings JSON...')
+        return "something else"
 
-        # Open new tab with account info, build endpoint url and fetch
-        api_page = await browser.newPage()
-        account_id = self.account_uuid
-        meter_no = self.meter_number
-        url = f"https://cned.opower.com/ei/edge/apis/cws-real-time-ami-v1/cws/cned/accounts/{account_id}/meters/{meter_no}/usage"
-        await api_page.goto(url)
-        data_elem = await api_page.querySelector('pre')
-        raw_data = await api_page.evaluate('(el) => el.textContent', data_elem)
+def create_driver():
+    system = platform.system()
+    if system == 'Darwin':
+        path = 'chrome_mac/chromedriver'
+    elif system == 'Linux':
+        path = 'chrome_linux/chromedriver'
+    elif system == 'Windows':
+        path = os.getcwd() + '\chrome_windows\chromedriver.exe'
 
-        data = json.loads(raw_data)
+    use_undetected_chromedriver = True
 
-        # Assign data to parent object (to fit starter code)
-        self.data = data
+    if use_undetected_chromedriver:
+        options = uc.ChromeOptions()
+        # options.add_argument('--profile-directory=Profile 8')
+        options.headless = True
+       
+        driver = uc.Chrome(options=options)
+        return driver
 
-        await browser.close()
-        logging.info('Done!')
-
-        return data
+    else: 
+        options = webdriver.ChromeOptions()
+        options.add_argument('--profile-directory=Profile 8')
+        driver = webdriver.Chrome(path, options=options)
+        return driver
 
 
-async def fetch_element(page, selector, max_tries=10):
-    tries = 0
-    el = None
-    while el == None and tries < max_tries:
-        el = await page.querySelector(selector)
-        await page.waitFor(1000)
-
-    return el
-
-print(f"Creating Meter")
-
-meter = Meter(
-    email=os.getenv("EMAIL"),
-    password=os.getenv("PASSWORD"),
-    mfa_type=os.getenv("MFA_TYPE"),
-    mfa_secret=os.getenv("MFA_SECRET"),
-    account_uuid=os.getenv("ACCOUNT_UUID"),
-    meter_number=os.getenv("METER_NUMBER"),
-    site=os.getenv("SITE"),
-    browser_path="/usr/bin/chromium-browser"
-    # browser_path="/usr/bin/google-chrome-stable"
-)
-
-# make sure to comment below out before pushing
-
-
-# import test
-# meter = Meter(
-#     email=test.email,
-#     password=test.password,
-#     mfa_type=test.mfa_type,
-#     mfa_secret=test.mfa_secret,
-#     account_uuid=test.account_uuid,
-#     meter_number=test.meter_number
-# )
-
-
-
-print(f"Calling meter.last_read()..")
-startTime, endTime, value, uom = asyncio.get_event_loop().run_until_complete(meter.last_read())
-
-message = {'startTime': startTime, 'endTime': endTime, 'value': value, 'uom': uom}
-
-print(f"message: {message}")
-
-mqtthost = os.getenv("MQTT_HOST")
-mqttuser = os.getenv("MQTT_USER")
-mqttpass = os.getenv("MQTT_PASS")
-
-print(f"Connecting to mqtt {mqtthost} as {mqttuser}")
-
-mqttc = mqtt.Client("oru_meter_reader")
-mqttc.username_pw_set(username=mqttuser, password=mqttpass)
-mqttc.connect(mqtthost)
-
-print(f"Publishing to mqtt")
-
-print(f"Publishing electric_meter/value: {value}")
-mqttc.publish('electric_meter/value', value, retain=True)
-time.sleep(1)
-
-print(f"Publishing electric_meter/uom: {uom}")
-mqttc.publish('electric_meter/uom', uom, retain=True)
-time.sleep(1)
-
-print(f"Publishing electric_meter/startTime: {startTime}")
-mqttc.publish('electric_meter/startTime', startTime, retain=True)
-time.sleep(1)
-
-print(f"Publishing electric_meter/endTime: {endTime}")
-mqttc.publish('electric_meter/endTime', endTime, retain=True)
-time.sleep(1)
-
-print(f"Publishing electric_meter/message: {json.dumps(message)}")
-mqttc.publish('electric_meter/message', json.dumps(message), retain=True)
-time.sleep(1)
-
-print(f"Disconnectig from mqtt")
-mqttc.disconnect()
-
-print(f"DONE\n\n")
+if __name__ == '__main__':
+    driver = create_driver()
+    bot = InstaBot(driver, "")
+    bot.mainFunc()
