@@ -95,46 +95,34 @@ class Meter(object):
 
             await self.browse()
 
-            # Reassign to fit legacy code
-            jsonResponse = self.data
+            # Reassign to fit legacy code'
+        
+
+
+            # jsonResponse = self.data
             
-            if 'error' in jsonResponse:
-                raise MeterError(jsonResponse['error']['details'])   # ERROR HERE
-            for read in jsonResponse['reads']:
-                if read['value'] is not None:
-                    lastRead = read
+            # if 'error' in jsonResponse:
+            #     raise MeterError(jsonResponse['error']['details'])   # ERROR HERE
+            # for read in jsonResponse['reads']:
+            #     if read['value'] is not None:
+            #         lastRead = read
 
-            self._LOGGER.debug("lastRead = %s", lastRead)
-            self.startTime = lastRead['startTime']
-            self.endTime = lastRead['endTime']
-            self.last_read_val = lastRead['value']
-            self.unit_of_measurement = jsonResponse['unit']
+            # self._LOGGER.debug("lastRead = %s", lastRead)
+            # self.startTime = lastRead['startTime']
+            # self.endTime = lastRead['endTime']
+            # self.last_read_val = lastRead['value']
+            # self.unit_of_measurement = jsonResponse['unit']
 
-            self._LOGGER.info("last read = %s %s %s %s", self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement)
+            # self._LOGGER.info("last read = %s %s %s %s", self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement)
 
-            testArray = [self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement]
-            # for x in testArray:
-            #     print(str(x))
+            # testArray = [self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement]
+           
         
             return self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement
         except:
-            raise MeterError("Error requesting meter data PIZZZAAAAAAA ")
+            raise MeterError("Error requesting meter data")
 
     async def browse(self):
-        # screenshotFiles = glob.glob('meter*.png')
-        # for filePath in screenshotFiles:
-        #     try:
-        #         os.remove(filePath)
-        #     except:
-        #         print("Error while deleting file : ", filePath)
-
-
-        # browser_launch_config = {
-        #     'defaultViewport': {'width': 1920, 'height': 1080},
-        #     'dumpio': False,
-        #     'headless': True,
-        #     'args': ['--no-sandbox']
-        #     }
 
         browser_launch_config = {
             "defaultViewport": {"width": 1920, "height": 1080},
@@ -219,6 +207,8 @@ meter = Meter(
 )
 
 # make sure to comment below out before pushing
+
+
 # import test
 # meter = Meter(
 #     email=test.email,

@@ -5,6 +5,8 @@ import json
 import logging
 import time
 import pyppeteer
+import shutil
+import requests
 
 # start of class definitions here
 class MeterError(Exception):
@@ -90,9 +92,6 @@ class Meter(object):
     async def last_read(self):
         """Return the last meter read value and unit of measurement"""
         try:
-            # asyncio.set_event_loop(self.loop)
-            # asyncio.get_event_loop().create_task(self.browse())
-
             await self.browse()
 
             # Reassign to fit legacy code
@@ -113,81 +112,132 @@ class Meter(object):
             self._LOGGER.info("last read = %s %s %s %s", self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement)
 
             testArray = [self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement]
-            # for x in testArray:
-            #     print(str(x))
         
             return self.startTime, self.endTime, self.last_read_val, self.unit_of_measurement
-        except:
-            raise MeterError("Error requesting meter data PIZZZAAAAAAA ")
+        except Exception as e:
+            print(e)
+            raise MeterError("Error requesting meter data")
 
     async def browse(self):
-        # screenshotFiles = glob.glob('meter*.png')
-        # for filePath in screenshotFiles:
-        #     try:
-        #         os.remove(filePath)
-        #     except:
-        #         print("Error while deleting file : ", filePath)
+        # Define browser configuration
+        browser_launch_config = {
+        "defaultViewport": {"width": 390, "height": 844},
+        "dumpio": True,
+        "headless": False,
+        "isMobile": True,
+        "args": ["--no-sandbox", "--disable-gpu", "--disable-software-rasterizer"]}
+        if self.browser_path is not None:
+            browser_launch_config['executablePath'] = self.browser_path
+
+        # Create browser
+        browser = await pyppeteer.launch(browser_launch_config)
+
+        # Go to new tab, set user agent to iPhone to allow for file upload
+        page = await browser.newPage()
+        await page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/100.0.4896.85 Mobile/15E148 Safari/604.1")
+
+        # Go to instagram
+        await page.goto('https://www.instagram.com', {'waitUntil' : 'domcontentloaded'})
+
+        # Sleep so loading can finish
+        time.sleep(10)
+
+        # Click "I want to log in" to beat splash page
+        # - - - NOTE all below are via Chrome on instagram.com user agent iPhone 12 Pro @ 390 x 844
+        loginSplash_selector = '#react-root > section > main > article > div > div > div.qF0y9.Igw0E.IwRSH.eGOV_.vwCYk > div.AC7dP.Igw0E.IwRSH.pmxbr.eGOV_._4EzTm.gKUEf > button:nth-child(1)'
+        loginSplash_jspath = 'document.querySelector("#react-root > section > main > article > div > div > div.qF0y9.Igw0E.IwRSH.eGOV_.vwCYk > div.AC7dP.Igw0E.IwRSH.pmxbr.eGOV_._4EzTm.gKUEf > button:nth-child(1)")'
+        loginSplash_xpath = '//*[@id="react-root"]/section/main/article/div/div/div[2]/div[3]/button[1]'
+        loginSplash_full_xpath = "/html/body/div[1]/section/main/article/div/div/div[2]/div[3]/button[1]"
+
+        try:
+            await page.querySelector(loginSplash_full_xpath)
+        except Exception as e:
+            print(str(e))
+            await page.evaluate('window.alert("1st one query selector did not work!!!!");')
+
+        try:
+            # data_elem = await page.querySelector('[type="button"]')
+            # raw_data = await page.evaluate('(el) => el.textContent', data_elem)
+            # print(str(raw_data))
+            all_buttons = await fetch_elements(page, '[type="button"]')
+            for button in all_buttons:
+                button_text = await page.evaluate('(el) => el.textContent', button)
+                print(str(button_text))
+                if str(button_text) == "Log In":
+                    await page.click(button)
+                    break
+                
+        except Exception as e:
+            alerts = 'window.alert("' + str(e) + '");'
+            await page.evaluate('window.alert("2nd one no work!!!!");')
+            await page.evaluate(alerts)
+
+        time.sleep(5)
 
 
-        # browser_launch_config = {
-        #     'defaultViewport': {'width': 1920, 'height': 1080},
-        #     'dumpio': False,
-        #     'headless': True,
-        #     'args': ['--no-sandbox']
-        #     }
+
+    async def browse2(self):
 
         browser_launch_config = {
-            "defaultViewport": {"width": 1920, "height": 1080},
+            "defaultViewport": {"width": 390, "height": 844},
             "dumpio": True,
+            "headless": False,
             "args": ["--no-sandbox", "--disable-gpu", "--disable-software-rasterizer"]}
         if self.browser_path is not None:
             browser_launch_config['executablePath'] = self.browser_path
 
-        # Create browser and login
+        # Create browser
         browser = await pyppeteer.launch(browser_launch_config)
+
+        # Open new tab and go to reddit
         page = await browser.newPage()
-        await page.goto('https://coned.com/en/login', {'waitUntil' : 'domcontentloaded'})
-        element = await page.querySelector('#form-login-email')
-        logging.info('Authenticating...')
+        await page.goto('https://old.reddit.com/r/ProgrammerHumor/top/?sort=top&t=week', {'waitUntil' : 'domcontentloaded'})
 
-        await page.type('#form-login-email', self.email)
-        await page.type('#form-login-password', self.password)
-        await page.click('.submit-button')
+        logging.info('opened reddit')
+        print("opened reddit")
 
-
-        # Get MFA form object
-        mfa_form = await fetch_element(page, '.js-login-new-device-form-selector:not(.hidden)')
-        if mfa_form is None:
-            logging.error('Never got MFA prompt. Aborting!')
+        # Store fetched images and memos here 2D arr
+        memeUrlsAndDescriptions = []
+        
+        # Fetch and store all elements in list
+        reddit_content = await fetch_elements(page, 'a.title.may-blank.outbound')
+        if reddit_content is None:
+            logging.error('Fetching reddit elements failed')
             return
+        else:
+            logging.info('Iterating over page 1 items')
 
-        # Enter MFA form text box
-        logging.info('Entering MFA code...')
-        mfa = await fetch_element(page, '#form-login-mfa-code')
-        await mfa.type(self.mfa_secret)
-        await asyncio.gather(
-            page.waitForNavigation(),
-            page.click('.js-login-new-device-form .button'),
-        )
+            for e in reddit_content:
+                title = await page.evaluate('(element) => element.textContent', e)
+                url = await page.evaluate('(element) => element.getAttribute("data-href-url")', e)
 
-        # Await page load
-        logging.info('Pausing for auth...')
-        await page.waitFor(5000)
-        logging.info('Fetching readings JSON...')
+                combined = [url, title]
+                memeUrlsAndDescriptions.append(combined)
+                print(title)
+                print(str(url))
 
-        # Open new tab with account info, build endpoint url and fetch
-        api_page = await browser.newPage()
-        account_id = self.account_uuid
-        meter_no = self.meter_number
-        url = f"https://cned.opower.com/ei/edge/apis/cws-real-time-ami-v1/cws/cned/accounts/{account_id}/meters/{meter_no}/usage"
-        await api_page.goto(url)
-        data_elem = await api_page.querySelector('pre')
-        raw_data = await api_page.evaluate('(el) => el.textContent', data_elem)
+        # SAVE IMAGES USING REQUESTS -- ADD PROXY
+        imgCounter = 0
+        for i in memeUrlsAndDescriptions:
+            url = i[0]
+            response = requests.get(url, stream=True)
 
-        data = json.loads(raw_data)
+            img_save_path = '/Users/tucker/Documents/GitHub/home-assistant-addons/dcsm/imgs/'
+            filename = 'img_' + str(imgCounter) + '.png'
+            filepath = img_save_path + filename
+            imgCounter += 1
+            with open(filepath, 'wb') as out_file:
+                shutil.copyfileobj(response.raw, out_file)
+            del response
+            time.sleep(5)
+            print("finished saving")
 
-        # Assign data to parent object (to fit starter code)
-        self.data = data
+
+        
+        
+        print("sleeping 30")
+        time.sleep(30)
+        data = 5
 
         await browser.close()
         logging.info('Done!')
@@ -204,35 +254,48 @@ async def fetch_element(page, selector, max_tries=10):
 
     return el
 
+async def fetch_elements(page, selector, max_tries=10):
+    tries = 0
+    el = None
+    while el == None and tries < max_tries:
+        el = await page.querySelectorAll(selector)
+        await page.waitFor(1000)
+
+    return el
+
 print(f"Creating Meter")
 
-meter = Meter(
-    email=os.getenv("EMAIL"),
-    password=os.getenv("PASSWORD"),
-    mfa_type=os.getenv("MFA_TYPE"),
-    mfa_secret=os.getenv("MFA_SECRET"),
-    account_uuid=os.getenv("ACCOUNT_UUID"),
-    meter_number=os.getenv("METER_NUMBER"),
-    site=os.getenv("SITE"),
-    browser_path="/usr/bin/chromium-browser"
-    # browser_path="/usr/bin/google-chrome-stable"
-)
+# meter = Meter(
+#     email=os.getenv("EMAIL"),
+#     password=os.getenv("PASSWORD"),
+#     mfa_type=os.getenv("MFA_TYPE"),
+#     mfa_secret=os.getenv("MFA_SECRET"),
+#     account_uuid=os.getenv("ACCOUNT_UUID"),
+#     meter_number=os.getenv("METER_NUMBER"),
+#     site=os.getenv("SITE"),
+#     browser_path="/usr/bin/chromium-browser"
+#     # browser_path="/usr/bin/google-chrome-stable"
+# )
 
 # make sure to comment below out before pushing
-# import test
-# meter = Meter(
-#     email=test.email,
-#     password=test.password,
-#     mfa_type=test.mfa_type,
-#     mfa_secret=test.mfa_secret,
-#     account_uuid=test.account_uuid,
-#     meter_number=test.meter_number
-# )
+
+
+import test
+meter = Meter(
+    email=test.email,
+    password=test.password,
+    mfa_type=test.mfa_type,
+    mfa_secret=test.mfa_secret,
+    account_uuid=test.account_uuid,
+    meter_number=test.meter_number
+)
 
 
 
 print(f"Calling meter.last_read()..")
 startTime, endTime, value, uom = asyncio.get_event_loop().run_until_complete(meter.last_read())
+
+
 
 message = {'startTime': startTime, 'endTime': endTime, 'value': value, 'uom': uom}
 
