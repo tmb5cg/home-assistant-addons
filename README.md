@@ -60,4 +60,4 @@ SOFTWARE.
 
 
 [addon-oru]: https://github.com/tmb5cg/home-assistant-addons/tree/main/oru
-[addon-monkeypox]: https://github.com/bvlaicu/home-assistant-addons/tree/master/monkeypox
+[addon-monkeypox]: https://github.com/tmb5cg/home-assistant-addons/tree/master/monkeypox
