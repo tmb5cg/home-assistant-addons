@@ -40,12 +40,7 @@ while true; do
   #tail -f /dev/null
 
   echo ""
-<<<<<<< HEAD
-  echo "Not going to sleep for 30 minutes"
-  sleep 4
-=======
-  echo "Sleeping 5 mins.."
-  sleep 300
->>>>>>> parent of d943ab4 (bug fix)
+  echo "Sleeping 30 mins.."
+  sleep 1800
   echo ""
 done
