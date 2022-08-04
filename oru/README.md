@@ -1,6 +1,6 @@
-# Orange and Rockland Utility to MQTT Bridge hass.io addon
+# ConEd Energy Usage Logger
 
-Add-on for retrieving the last meter read from [Orange and Rockland Utility](oru.com) or [ConEdison](coned.com) and publish the data via MQTT
+Add-on for retrieving the last meter read from [ConEdison](coned.com) and publish the data via MQTT
 
 ## Configuration
 
