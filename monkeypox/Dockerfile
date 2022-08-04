@@ -26,7 +26,7 @@ RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
 #     && mkdir -p /home/chrome && chown -R chrome:chrome /home/chrome
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 # COPY ./coned ./coned
 COPY run.py .
