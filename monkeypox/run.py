@@ -134,6 +134,7 @@ class InstaBot:
 
 def create_driver():
     system = platform.system()
+    print("the system detected is: " + str(system))
     if system == 'Darwin':
         path = 'chrome_mac/chromedriver'
     elif system == 'Linux':
@@ -141,21 +142,21 @@ def create_driver():
     elif system == 'Windows':
         path = os.getcwd() + '\chrome_windows\chromedriver.exe'
 
-    use_undetected_chromedriver = True
+    # use_undetected_chromedriver = False
 
-    if use_undetected_chromedriver:
-        options = uc.ChromeOptions()
-        # options.add_argument('--profile-directory=Profile 8')
-        options.headless = True
+    # if use_undetected_chromedriver:
+    #     options = uc.ChromeOptions()
+    #     # options.add_argument('--profile-directory=Profile 8')
+    #     options.headless = True
        
-        driver = uc.Chrome(options=options)
-        return driver
+    #     driver = uc.Chrome(options=options)
+    #     return driver
 
-    else: 
-        options = webdriver.ChromeOptions()
-        options.add_argument('--profile-directory=Profile 8')
-        driver = webdriver.Chrome(path, options=options)
-        return driver
+    # else: 
+    options = webdriver.ChromeOptions()
+    # options.add_argument('--profile-directory=Profile 8')
+    driver = webdriver.Chrome(path, options=options)
+    return driver
 
 
 if __name__ == '__main__':
