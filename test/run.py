@@ -1,17 +1,15 @@
-# import os
-# import os.path
-# import platform
-# import time
-# from datetime import date, datetime
-# from decimal import Decimal
-# from os import path
-# from time import sleep
-# from tokenize import Double
-# from venv import create
-
-# import paho.mqtt.client as mqtt
-# import undetected_chromedriver as uc
 import time
+
+from selenium import webdriver
+from selenium.common.exceptions import (NoSuchElementException,
+                                        TimeoutException, WebDriverException)
+from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import ui
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 
@@ -19,23 +17,23 @@ class Test:
     def __init__(self, holder):
         self.holder = holder
         print("boutta get the driver")
-        # self.driver = self.getDriver()
+        self.driver = self.getDriver()
         # print("the system detected is: " + str(yeet))
         # self.monkeypox()
 
     def myFunction(self):
         print(self.holder)
 
-    # def getDriver(self):
+    def getDriver(self):
 
-    #     options = webdriver.ChromeOptions()
-    #     options._binary_location = "/usr/bin/chromium-browser"
+        options = webdriver.ChromeOptions()
+        options._binary_location = "/usr/bin/chromium-browser"
 
-    #     driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
+        driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
 
-    #     # options.add_argument('--profile-directory=Profile 8')
-    #     # driver = webdriver.Chrome(path, options=options)
-    #     return driver
+        # options.add_argument('--profile-directory=Profile 8')
+        # driver = webdriver.Chrome(path, options=options)
+        return driver
 
     # def monkeypox(self):
     #         self.driver.get("https://vax4nyc.nyc.gov/patient/s/vaccination-schedule?page=Monkeypox")
