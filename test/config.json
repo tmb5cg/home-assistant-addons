@@ -1,7 +1,7 @@
 {
   "name": "Test repo",
   "version": "0.1.1",
-  "slug": "mpx",
+  "slug": "test",
   "description": "test for raspberry pi",
   "url": "https://github.com/tmb5cg/home-assistant-addons/tree/main/test",
   "panel_icon": "mdi:chart-areaspline",
