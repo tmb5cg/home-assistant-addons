@@ -110,4 +110,4 @@ class Test:
 
 if __name__ == '__main__':
     x = "hi"
-    bot = Test(x)
+    # bot = Test(x)
