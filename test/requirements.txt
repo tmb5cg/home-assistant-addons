@@ -9,7 +9,6 @@ outcome==1.2.0
 pycparser==2.21
 pyOpenSSL==22.0.0
 PySocks==1.7.1
-selenium==4.3.0
 sniffio==1.2.0
 sortedcontainers==2.4.0
 trio==0.21.0
