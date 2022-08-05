@@ -11,16 +11,16 @@
 
 # import paho.mqtt.client as mqtt
 # import undetected_chromedriver as uc
-# from selenium import webdriver
-# from selenium.common.exceptions import (NoSuchElementException,
-#                                         TimeoutException, WebDriverException)
-# from selenium.webdriver import Chrome, ChromeOptions
-# from selenium.webdriver.common.action_chains import ActionChains
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.common.keys import Keys
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.support import ui
-# from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver
+from selenium.common.exceptions import (NoSuchElementException,
+                                        TimeoutException, WebDriverException)
+from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import ui
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 import platform
@@ -30,8 +30,8 @@ import platform
 class Test:
     def __init__(self, holder):
         self.holder = holder
-        system = platform.system()
-        print("the system detected is: " + str(system))
+        yeet = platform.system()
+        print("the system detected is: " + str(yeet))
 
     def myFunction(self):
         print(self.holder)
