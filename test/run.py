@@ -17,22 +17,20 @@ class Test:
     def __init__(self, holder):
         self.holder = holder
         print("boutta get the driver")
-        self.driver = self.getDriver()
+        self.driver = self.create_driver()
         # print("the system detected is: " + str(yeet))
         # self.monkeypox()
 
     def myFunction(self):
         print(self.holder)
 
-    def getDriver(self):
+    def create_driver(self):
+        path = 'chrome_linux/chromedriver'
+
+        use_undetected_chromedriver = True
 
         options = webdriver.ChromeOptions()
-        options._binary_location = "/usr/bin/chromium-browser"
-
-        driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver",options=options)
-
-        # options.add_argument('--profile-directory=Profile 8')
-        # driver = webdriver.Chrome(path, options=options)
+        driver = webdriver.Chrome(path, options=options)
         return driver
 
     # def monkeypox(self):
