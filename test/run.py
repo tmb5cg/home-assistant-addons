@@ -12,26 +12,12 @@
 # import paho.mqtt.client as mqtt
 # import undetected_chromedriver as uc
 import time
-from selenium import webdriver
-from selenium.common.exceptions import (NoSuchElementException,
-                                        TimeoutException, WebDriverException)
-from selenium.webdriver import Chrome, ChromeOptions
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support import ui
-from selenium.webdriver.support.wait import WebDriverWait
-
-
-import platform
 
 
 
 class Test:
     def __init__(self, holder):
         self.holder = holder
-        yeet = platform.system()
         print("boutta get the driver")
         # self.driver = self.getDriver()
         # print("the system detected is: " + str(yeet))
