@@ -23,7 +23,8 @@
 # from selenium.webdriver.support.wait import WebDriverWait
 
 
-from sys import platform
+import platform
+
 
 
 class Test:
