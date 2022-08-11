@@ -5,8 +5,8 @@ RUN apt-get update && apt-get upgrade -yq
 RUN apt-get install python3 python3-pip jq nano -y
 
 # Install chromium
-# RUN apt-get update && apt-get install -y chromium
-# RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
+RUN apt-get update && apt-get install -y chromium
+RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
 # # Install chrome and dependencies
 # RUN apt-get update && apt-get install -y \

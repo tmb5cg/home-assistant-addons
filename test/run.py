@@ -10,6 +10,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support import ui
 from selenium.webdriver.support.wait import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 
 
@@ -25,12 +27,12 @@ class Test:
         print(self.holder)
 
     def create_driver(self):
-        path = 'chrome_linux/chromedriver'
+        # path = 'chrome_linux/chromedriver'
 
         use_undetected_chromedriver = True
 
-        options = webdriver.ChromeOptions()
-        driver = webdriver.Chrome(path, options=options)
+        # options = webdriver.ChromeOptions()
+        driver = webdriver.Chrome(ChromeDriverManager().install())
         return driver
 
     # def monkeypox(self):
